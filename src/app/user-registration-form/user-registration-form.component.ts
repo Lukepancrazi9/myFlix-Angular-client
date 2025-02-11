@@ -29,17 +29,15 @@ ngOnInit(): void {
 
 // This is the function responsible for sending the form inputs to the backend
 registerUser(): void {
-    this.fetchApiData.userRegistration(this.userData).subscribe((result) => {
-  // Logic for a successful user registration goes here! (To be implemented)
-     this.dialogRef.close(); // This will close the modal on success!
-     this.snackBar.open(result, 'OK', {
-        duration: 2000
-     });
-    }, (result) => {
-      this.snackBar.open(result, 'OK', {
-        duration: 2000
-      });
-    });
-  }
+  console.log('Register button clicked');
+  this.fetchApiData.userRegistration(this.userData).subscribe((result) => {
+    console.log('Registration successful', result);
+    this.dialogRef.close();
+    this.snackBar.open('Registration Successful', 'OK', { duration: 2000 });
+  }, (error) => {
+    console.error('Registration error', error);
+    this.snackBar.open(error.error || 'Registration failed. Please try again.', 'OK', { duration: 2000 });
+  });
+}
 
-  }
+}
