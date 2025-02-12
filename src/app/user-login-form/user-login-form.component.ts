@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
  * This class allows an existing user to log in
  */
 export class UserLoginFormComponent implements OnInit {
-  @Input() userData = { username: '', password: '' };
+  @Input() userData = { Username: '', Password: '' };
 
   constructor(
     public fetchApiData: FetchApiDataService,
@@ -29,19 +29,17 @@ export class UserLoginFormComponent implements OnInit {
    * Allows existing user to log in using their logim info and token
    */
   loginUser(): void {
+    console.log('Login attempt with:', this.userData);
     this.fetchApiData.userLogin(this.userData).subscribe(
       (result) => {
-        //setting login info to localstorage
+        console.log('Login successful:', result);
         localStorage.setItem('user', JSON.stringify(result.user));
         localStorage.setItem('token', result.token);
-
-        //router
         this.router.navigate(['movies']);
-
         this.dialogRef.close();
       },
-      (result) => {
-        console.log(result);
+      (error) => {
+        console.error('Login error:', error);
         this.snackBar.open('Incorrect info, please try again', 'Ok', {
           duration: 2000,
         });
