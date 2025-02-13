@@ -1,0 +1,55 @@
+<div>
+  <!-- Toolbar -->
+  <mat-toolbar color="primary">
+    <button mat-button [routerLink]="'/movies'" class="toolbar-button">
+      Crazi Movies
+    </button>
+    <button mat-button [matMenuTriggerFor]="menu">My Profile</button>
+    <button mat-button [matMenuTriggerFor]="menu" (click)="logout()">
+      Logout
+    </button>
+    <mat-menu #menu="matMenu"></mat-menu>
+  </mat-toolbar>
+
+  <!-- Display User Info (e.g., Favorites) -->
+  <div *ngIf="user">
+    <h2>Profile Name: {{ user.Username }}</h2>
+    <!-- Update Profile Button -->
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="openUserUpdateDialog()"
+      style="margin-right: 10px"
+    >
+      Update my Profile
+    </button>
+    <h3>Your Favorite Movies</h3>
+    <div
+      *ngIf="favoriteMovies.length > 0; else noFavorites"
+      class="favorite-movies-container"
+    >
+      <div *ngFor="let movie of favoriteMovies">
+        <mat-card class="favorite-movie-card">
+          <mat-card-header>
+            <mat-card-title>{{ movie.Title }}</mat-card-title>
+            <mat-card-subtitle
+              >Directed by: {{ movie.Director.Name }}</mat-card-subtitle
+            >
+          </mat-card-header>
+          <mat-card-content>
+            <img [src]="movie.ImageUrl" alt="{{ movie.Title }}" />
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <ng-template #noFavorites>
+      <p>No favorite movies found.</p>
+    </ng-template>
+  </div>
+
+  <!-- Button to navigate back to Movie Cards -->
+  <button mat-raised-button color="accent" [routerLink]="'/movies'">
+    Back to Movie Cards
+  </button>
+</div>

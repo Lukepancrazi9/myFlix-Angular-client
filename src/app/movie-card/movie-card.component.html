@@ -1,4 +1,62 @@
-<div style="display: flex">
+<mat-toolbar color="primary">
+  <span>Crazi Movies</span>
+  <span class="spacer"></span>
+
+  <span class="spacer"></span>
+
+  <button mat-button [matMenuTriggerFor]="menu">My Profile</button>
+
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item [routerLink]="['/profile']">Profile</button>
+    <button mat-menu-item (click)="logout()">Logout</button>
+  </mat-menu>
+</mat-toolbar>
+
+<div class="movie-grid" (scroll)="updateArrowVisibility($event.target)">
+  <button class="arrow prev" (click)="scroll(-1)" *ngIf="showLeftArrow">
+    <mat-icon>keyboard_arrow_left</mat-icon>
+  </button>
+
+  <mat-card *ngFor="let movie of movies">
+    <mat-card-header>
+      <mat-card-title>{{ movie.Title }}</mat-card-title>
+      <mat-card-subtitle
+        >Directed by: {{ movie.Director.Name }}</mat-card-subtitle
+      >
+      <mat-card-subtitle>{{ movie.Genre.Name }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <img src="{{ movie.ImageUrl }}" alt="{{ movie.Title }}" width="300" />
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button mat-button color="primary" (click)="openDirectorDialog(movie)">
+        Director
+      </button>
+      <button mat-button color="primary" (click)="openSynopsisDialog(movie)">
+        Synopsis
+      </button>
+      <button
+        mat-icon-button
+        (click)="
+          isFavorite(movie._id)
+            ? removeTitleFromFavorites(movie._id)
+            : addTitleToFavorites(movie._id)
+        "
+      >
+        <mat-icon>{{
+          isFavorite(movie._id) ? "favorite" : "favorite_border"
+        }}</mat-icon>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <button class="arrow next" (click)="scroll(1)" *ngIf="showRightArrow">
+    <mat-icon>keyboard_arrow_right</mat-icon>
+  </button>
+</div>
+<!-- <div style="display: flex">
   <mat-card *ngFor="let movie of movies" style="flex: 1 1 auto">
     <mat-card-header>
       <mat-card-title>{{ movie.Title }}</mat-card-title>
@@ -14,4 +72,4 @@
       <mat-icon>favorite_border</mat-icon>
     </mat-card-actions>
   </mat-card>
-</div>
+</div> -->

@@ -1,0 +1,49 @@
+.movie-grid .arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-75%);
+  width: 50px;
+  height: 550px;
+  background-color: rgba(100, 104, 109, 0.8);  /* Slightly transparent for a modern look */
+  color: white;
+  border: none;
+  border-radius: 5%;
+  cursor: pointer;
+  z-index: 10; /* Ensure it's on top */
+}
+
+.movie-grid .arrow.prev {
+  left: 10px; /* Position left arrow */
+}
+
+.movie-grid .arrow.next {
+  right: 10px; /* Position right arrow */
+}
+
+.mat-card {
+  width: 300px; /* Fixed width */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.movie-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 20px;
+  scrollbar-width: none; /* Firefox */
+}
+
+.movie-grid::-webkit-scrollbar {
+  display: none; /* Chrome/Edge */
+}
+
+mat-toolbar {
+  display: flex;
+  justify-content: space-between;
+}
+
+.spacer {
+  flex: 1;
+}

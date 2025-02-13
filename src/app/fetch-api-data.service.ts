@@ -34,8 +34,10 @@ export class FetchApiDataService {
   }
 
   // Get logged-in user details
-  public getUser(): any {
-    return JSON.parse(localStorage.getItem('user') || '{}');
+  public getUser(username: string): Observable<any> {
+    return this.http.get(apiUrl + `users/${username}`, {
+      headers: this.getHeaders(),
+    }).pipe(map(this.extractResponseData), catchError(this.handleError));
   }
 
   // Edit user
@@ -78,7 +80,10 @@ export class FetchApiDataService {
 
   // Add a movie to favorite movies
   public addFavMovies(username: string, movieID: string): Observable<any> {
-    return this.http.post(apiUrl + `users/${username}/movies/${movieID}`, {}, {
+    const body = {
+      movieId: movieID, // or any required parameters the backend expects
+    };
+    return this.http.post(apiUrl + `users/${username}/movies/${movieID}`, body, {
       headers: this.getHeaders(),
     }).pipe(map(this.extractResponseData), catchError(this.handleError));
   }
