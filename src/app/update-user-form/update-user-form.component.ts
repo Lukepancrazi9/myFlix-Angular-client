@@ -15,6 +15,7 @@ export class UpdateUserFormComponent implements OnInit {
     Email: '',
     Birthdate: '',
   };
+
   constructor(
     public fetchApiData: FetchApiDataService ,
     public dialogRef: MatDialogRef<UpdateUserFormComponent>,

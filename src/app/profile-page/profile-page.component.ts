@@ -53,9 +53,10 @@ export class ProfilePageComponent implements OnInit {
       width: '280px',
     });
   }
-
   logout(): void {
     localStorage.clear(); // Clear stored user data
     this.router.navigate(['/welcome']); // Redirect to the Welcome Page
   }
+
 }
+

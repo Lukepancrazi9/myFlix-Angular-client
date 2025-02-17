@@ -38,6 +38,14 @@
         Synopsis
       </button>
       <button
+        mat-button
+        color="primary"
+        (click)="openGenreDialog(movie)"
+        (mouseover)="logMovieData(movie)"
+      >
+        Genres
+      </button>
+      <button
         mat-icon-button
         (click)="
           isFavorite(movie._id)

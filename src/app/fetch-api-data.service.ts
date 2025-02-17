@@ -72,6 +72,12 @@ export class FetchApiDataService {
       .pipe(map(this.extractResponseData), catchError(this.handleError));
   }
 
+  public getAllGenres(): Observable<any> {
+    return this.http.get(apiUrl + 'genres', { headers: this.getHeaders() })
+      .pipe(map(this.extractResponseData), catchError(this.handleError));
+  }
+  
+
   // Get genre details
   public getGenre(genreName: string): Observable<any> {
     return this.http.get(apiUrl + `movies/genres/${genreName}`, { headers: this.getHeaders() })

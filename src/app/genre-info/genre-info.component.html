@@ -1,0 +1,18 @@
+<h2 mat-dialog-title>Genres</h2>
+
+<mat-dialog-content>
+  <div *ngIf="data.genres && data.genres.length > 0">
+    <div *ngFor="let genre of data.genres">
+      <p>
+        <strong>{{ genre.Name }}</strong>
+      </p>
+      <p>{{ genre.Description }}</p>
+    </div>
+  </div>
+
+  <p *ngIf="!data.genres || data.genres.length === 0">No genres available.</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

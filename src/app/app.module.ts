@@ -26,6 +26,7 @@ import { UpdateUserFormComponent } from './update-user-form/update-user-form.com
 import { SynopsisComponent } from './synopsis/synopsis.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { DirectorInfoComponent } from './director-info/director-info.component';
+import { GenreInfoComponent } from './genre-info/genre-info.component';
 
 const appRoutes: Routes = [
   { path: 'welcome', component: WelcomePageComponent },
@@ -45,6 +46,7 @@ const appRoutes: Routes = [
     UpdateUserFormComponent,
     SynopsisComponent,
     DirectorInfoComponent,
+    GenreInfoComponent,
   ],
   imports: [
     BrowserAnimationsModule,

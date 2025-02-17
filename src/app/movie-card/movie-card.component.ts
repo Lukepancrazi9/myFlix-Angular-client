@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { FetchApiDataService } from '../fetch-api-data.service';
 import { SynopsisComponent } from '../synopsis/synopsis.component';
 import { DirectorInfoComponent } from '../director-info/director-info.component';
+import { GenreInfoComponent } from '../genre-info/genre-info.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 
@@ -51,6 +52,10 @@ export class MovieCardComponent implements OnInit {
     }
   }
 
+  logMovieData(movie: any): void {
+    console.log('Movie Data:', movie);
+  }
+
   // Open synopsis dialog
   openSynopsisDialog(movie: any): void {
     this.dialog.open(SynopsisComponent, {
@@ -66,6 +71,14 @@ export class MovieCardComponent implements OnInit {
       width: '500px',
     });
   }
+
+  openGenreDialog(movie: any): void {
+    console.log('Opening Genre Dialog for:', movie);
+    this.dialog.open(GenreInfoComponent, {
+      data: { genres: movie.Genre },
+      width: '500px',
+    });
+  }  
 
   // Add movie to favorites
   addTitleToFavorites(movieID: string): void {
