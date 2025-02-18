@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { FetchApiDataService } from '../fetch-api-data.service';
 import { UpdateUserFormComponent } from '../update-user-form/update-user-form.component';
 import { Router } from '@angular/router';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-profile-page',
@@ -16,7 +17,8 @@ export class ProfilePageComponent implements OnInit {
   constructor(
     private fetchApiData: FetchApiDataService,
     public dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: any
   ) {}
 
   ngOnInit(): void {
@@ -25,28 +27,30 @@ export class ProfilePageComponent implements OnInit {
 
   // Fetch user data on initialization
   loadUserData(): void {
+    if (!isPlatformBrowser(this.platformId)) return; // Ensure it's running in the browser
+  
     const username = localStorage.getItem('user');
     if (!username) return;
   
     this.fetchApiData.getUser(username).subscribe(
       (data) => {
-        console.log('User data:', data); // Debugging
+        console.log('User data:', data);
         this.user = data;
   
-        const favoriteMovieIDs = data.Favorites || []; // Correct property name
-        console.log('Favorite movie IDs:', favoriteMovieIDs); // Debugging
+        const favoriteMovieIDs = data.Favorites || [];
+        console.log('Favorite movie IDs:', favoriteMovieIDs);
   
         this.fetchApiData.getAllMovies().subscribe((allMovies) => {
-          console.log('All movies:', allMovies); // Debugging
           this.favoriteMovies = allMovies.filter((movie: any) =>
-            favoriteMovieIDs.includes(movie._id) // Match IDs correctly
+            favoriteMovieIDs.includes(movie._id)
           );
-          console.log('Loaded favorite movies:', this.favoriteMovies); // Debugging
         });
       },
       (error) => console.error('Error fetching user:', error)
     );
   }
+  
+  
 
   openUserUpdateDialog(): void {
     this.dialog.open(UpdateUserFormComponent, {

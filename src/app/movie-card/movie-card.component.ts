@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { FetchApiDataService } from '../fetch-api-data.service';
 import { SynopsisComponent } from '../synopsis/synopsis.component';
@@ -6,6 +6,7 @@ import { DirectorInfoComponent } from '../director-info/director-info.component'
 import { GenreInfoComponent } from '../genre-info/genre-info.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-movie-card',
@@ -22,7 +23,8 @@ export class MovieCardComponent implements OnInit {
     public fetchApiData: FetchApiDataService,
     public snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: any
   ) {}
 
   ngOnInit(): void {
@@ -39,18 +41,16 @@ export class MovieCardComponent implements OnInit {
 
   // Get favorites from the logged-in user
   getFavorites(): void {
-    const username = localStorage.getItem('user'); // Get stored username
-    console.log('Retrieved username from localStorage:', username); // Debugging output
-
+    if (!isPlatformBrowser(this.platformId)) return; // Prevents SSR crash
+  
+    const username = localStorage.getItem('user');
     if (username) {
       this.fetchApiData.getUser(username).subscribe((resp: any) => {
-        console.log('Fetched favorites from user:', resp); // Debugging output
-        this.favorites = resp.FavoriteMovies || []; // Safely access FavoriteMovies
+        this.favorites = resp.FavoriteMovies || [];
       });
-    } else {
-      console.error('No username found in localStorage');
     }
   }
+  
 
   logMovieData(movie: any): void {
     console.log('Movie Data:', movie);
@@ -82,17 +82,17 @@ export class MovieCardComponent implements OnInit {
 
   // Add movie to favorites
   addTitleToFavorites(movieID: string): void {
+    if (typeof window === 'undefined') return;
+  
     const username = localStorage.getItem('user');
     if (!username) {
       console.error('No username found in local storage!');
       return;
     }
-
-    console.log(`Adding movie to favorites: ${movieID} for user: ${username}`);
-
+  
     this.fetchApiData.addFavMovies(username, movieID).subscribe(
       () => {
-        this.favorites.push(movieID); // Add movie to local favorites list
+        this.favorites.push(movieID);
         this.snackBar.open('Movie added to favorites', 'Success', { duration: 2000 });
       },
       (error) => {
@@ -101,20 +101,25 @@ export class MovieCardComponent implements OnInit {
       }
     );
   }
-
-  // Remove movie from favorites
+  
   removeTitleFromFavorites(movieID: string): void {
+    if (typeof window === 'undefined') return;
+  
     const username = localStorage.getItem('user');
     if (!username) return;
-
-    this.fetchApiData.deleteFavMovies(username, movieID).subscribe(() => {
-      this.favorites = this.favorites.filter(id => id !== movieID); // Remove locally
-      this.snackBar.open('Movie removed from favorites', 'Success', { duration: 2000 });
-    }, (error) => {
-      console.error('Error removing from favorites:', error);
-      this.snackBar.open('Failed to remove favorite', 'Error', { duration: 2000 });
-    });
+  
+    this.fetchApiData.deleteFavMovies(username, movieID).subscribe(
+      () => {
+        this.favorites = this.favorites.filter(id => id !== movieID);
+        this.snackBar.open('Movie removed from favorites', 'Success', { duration: 2000 });
+      },
+      (error) => {
+        console.error('Error removing from favorites:', error);
+        this.snackBar.open('Failed to remove favorite', 'Error', { duration: 2000 });
+      }
+    );
   }
+  
 
   // Check if movie is in favorites
   isFavorite(movieID: string): boolean {

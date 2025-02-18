@@ -1,8 +1,9 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Inject, PLATFORM_ID } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FetchApiDataService } from '../fetch-api-data.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-user-login-form',
@@ -20,7 +21,8 @@ export class UserLoginFormComponent implements OnInit {
     public fetchApiData: FetchApiDataService,
     public dialogRef: MatDialogRef<UserLoginFormComponent>,
     public snackBar: MatSnackBar,
-    public router: Router
+    public router: Router,
+    @Inject(PLATFORM_ID) private platformId: any
   ) {}
 
   ngOnInit(): void {}
@@ -31,20 +33,22 @@ export class UserLoginFormComponent implements OnInit {
   loginUser(): void {
     console.log('Login attempt with:', this.userData);
     this.fetchApiData.userLogin(this.userData).subscribe(
-      (result) => {
-        console.log('Login successful:', result);
-        // Store only the Username and token in localStorage
-        localStorage.setItem('user', result.user.Username); // Save just the username
-        localStorage.setItem('token', result.token); // Save the token
+      (response) => {
+        console.log('Login successful:', response);
+  
+        if (isPlatformBrowser(this.platformId)) { // Only store in browser
+          localStorage.setItem('user', response.user.Username);
+          localStorage.setItem('token', response.token);
+        }
+  
         this.router.navigate(['movies']);
         this.dialogRef.close();
       },
       (error) => {
         console.error('Login error:', error);
-        this.snackBar.open('Incorrect info, please try again', 'Ok', {
-          duration: 2000,
-        });
+        this.snackBar.open('Incorrect info, please try again', 'Ok', { duration: 2000 });
       }
     );
   }
+  
 }

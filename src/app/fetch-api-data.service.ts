@@ -12,9 +12,19 @@ export class FetchApiDataService {
   constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
+    let token = '';
+    if (typeof window !== 'undefined') {
+      token = localStorage.getItem('token') || '';
+    }
+  
+    console.log('Authorization Header:', token);  // Debug log for headers
+  
+    if (!token) {
+      throw new Error('Authorization token is missing');
+    }
+  
     return new HttpHeaders({
-      Authorization: token ? `Bearer ${token}` : '',
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     });
   }
@@ -42,7 +52,11 @@ export class FetchApiDataService {
 
   // Edit user
   public updateUserProfile(username: string, updatedData: any): Observable<any> {
-    const token = localStorage.getItem('token');
+    let token = '';
+    if (typeof window !== 'undefined') {
+      token = localStorage.getItem('token') || '';
+    }
+  
     if (!token) {
       return throwError(() => new Error('Authorization token is missing.'));
     }
@@ -119,8 +133,11 @@ export class FetchApiDataService {
   }
 
   // Handle errors
-  private handleError(error: HttpErrorResponse): any {
+  private handleError(error: HttpErrorResponse): Observable<never> {
     console.error(`Error Status: ${error.status}, Message: ${error.error || error.message}`);
-    return throwError(() => new Error('Something went wrong, please try again later.'));
+    if (error.status === 401) {
+      // Handle unauthorized error specifically (e.g., redirect to login)
+    }
+    return throwError(() => new Error(error.error?.message || 'Something went wrong, please try again later.'));
   }
 }
