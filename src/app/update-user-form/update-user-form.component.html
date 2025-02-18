@@ -1,51 +1,56 @@
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Update Profile Information</mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <form>
-      <mat-form-field>
-        <input
-          matInput
-          [(ngModel)]="userData.Username"
-          placeholder="Username"
-          type="text"
-          name="Username"
-        />
-      </mat-form-field>
-      <mat-form-field>
-        <input
-          matInput
-          [(ngModel)]="userData.Password"
-          type="password"
-          placeholder="Password"
-          name="Password"
-          required
-        />
-      </mat-form-field>
-      <mat-form-field>
-        <input
-          matInput
-          [(ngModel)]="userData.Email"
-          type="email"
-          placeholder="Email"
-          name="Email"
-        />
-      </mat-form-field>
-      <mat-form-field>
-        <input
-          matInput
-          [(ngModel)]="userData.Birthdate"
-          type="date"
-          placeholder="Birthday"
-          name="Birthday"
-        />
-      </mat-form-field>
-    </form>
-  </mat-card-content>
-  <mat-card-actions>
-    <button mat-raised-button (click)="updateUser()" color="primary">
-      Update
-    </button>
-  </mat-card-actions>
-</mat-card>
+<h2 mat-dialog-title>Update User Info</h2>
+<mat-dialog-content>
+  <mat-form-field appearance="outline">
+    <mat-label>Username</mat-label>
+    <input matInput [(ngModel)]="userData.Username" name="Username" required />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Email</mat-label>
+    <input
+      matInput
+      [(ngModel)]="userData.Email"
+      name="Email"
+      type="email"
+      required
+    />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Birthday</mat-label>
+    <input
+      matInput
+      [(ngModel)]="userData.Birthday"
+      name="Birthday"
+      type="date"
+    />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>New Password</mat-label>
+    <input
+      matInput
+      [(ngModel)]="userData.Password"
+      name="Password"
+      type="password"
+    />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Current Password (Required)</mat-label>
+    <input
+      matInput
+      [(ngModel)]="currentPassword"
+      name="CurrentPassword"
+      type="password"
+      required
+    />
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="closeDialog()">Cancel</button>
+  <button mat-button (click)="updateUser()" [disabled]="!currentPassword">
+    Save Changes
+  </button>
+</mat-dialog-actions>

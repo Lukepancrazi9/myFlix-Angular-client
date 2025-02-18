@@ -41,10 +41,22 @@ export class FetchApiDataService {
   }
 
   // Edit user
-  public editUser(username: string, updatedDetails: any): Observable<any> {
-    return this.http.put(apiUrl + `users/${username}`, updatedDetails, {
-      headers: this.getHeaders(),
-    }).pipe(map(this.extractResponseData), catchError(this.handleError));
+  public updateUserProfile(username: string, updatedData: any): Observable<any> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return throwError(() => new Error('Authorization token is missing.'));
+    }
+  
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+  
+    return this.http.put(`${apiUrl}users/${username}`, updatedData, { headers })
+      .pipe(
+        map(this.extractResponseData),
+        catchError(this.handleError)
+      );
   }
 
   // Delete user
