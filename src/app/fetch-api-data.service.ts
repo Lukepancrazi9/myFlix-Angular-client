@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -9,24 +10,33 @@ const apiUrl = 'https://crazi-movies-5042ca35c2c0.herokuapp.com/';
   providedIn: 'root',
 })
 export class FetchApiDataService {
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   private getHeaders(): HttpHeaders {
-    let token = '';
-    if (typeof window !== 'undefined') {
-      token = localStorage.getItem('token') || '';
+    if (isPlatformBrowser(this.platformId)) {
+      // We're in the browser
+      const token = localStorage.getItem('token') || '';
+      console.log('Authorization Header:', token);
+      // Instead of throwing an error, return headers without token if it’s not present.
+      if (!token) {
+        return new HttpHeaders({
+          'Content-Type': 'application/json',
+        });
+      }
+      return new HttpHeaders({
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      });
+    } else {
+      // On the server, localStorage is not available.
+      // Return headers without the token.
+      return new HttpHeaders({
+        'Content-Type': 'application/json',
+      });
     }
-  
-    console.log('Authorization Header:', token);  // Debug log for headers
-  
-    if (!token) {
-      throw new Error('Authorization token is missing');
-    }
-  
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    });
   }
 
   // User registration

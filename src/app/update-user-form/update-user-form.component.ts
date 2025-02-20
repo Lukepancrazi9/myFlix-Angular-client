@@ -10,12 +10,15 @@ import { Router } from '@angular/router';
   styleUrls: ['./update-user-form.component.scss'],
 })
 export class UpdateUserFormComponent implements OnInit {
+  // Form model for the update form
   userData: any = {
     Username: '',
     Email: '',
     Birthday: '',
-    Password: '', // New password (if provided)
+    Password: '' // New password (if the user wishes to change it)
   };
+
+  // Field for current password to verify the update
   currentPassword: string = '';
 
   constructor(
@@ -26,23 +29,21 @@ export class UpdateUserFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Retrieve the username (stored as a simple string in localStorage)
+    // Retrieve the username stored as a plain string in localStorage
     const username = localStorage.getItem('user');
     if (username) {
-      // Fetch full user details from the API
       this.fetchApiData.getUser(username).subscribe(
         (data: any) => {
-          // Populate the form with the fetched user data
-          this.userData = {
-            Username: data.Username,
-            Email: data.Email,
-            Birthday: data.Birthday ? data.Birthday.split('T')[0] : '', // Format as YYYY-MM-DD if needed
-            Password: '', // Leave blank for new password
-          };
+          // Prepopulate the form with existing user details.
+          this.userData.Username = data.Username;
+          this.userData.Email = data.Email;
+          // Format Birthday as YYYY-MM-DD if it exists.
+          this.userData.Birthday = data.Birthday ? data.Birthday.split('T')[0] : '';
+          this.userData.Password = ''; // Leave password blank
         },
         (error) => {
-          console.error('Error fetching user data:', error);
-          this.snackBar.open('Error loading user info. Please try again.', 'OK', { duration: 2000 });
+          console.error('Error loading user data:', error);
+          this.snackBar.open('Error loading user data. Please try again.', 'OK', { duration: 2000 });
         }
       );
     } else {
@@ -52,32 +53,35 @@ export class UpdateUserFormComponent implements OnInit {
   }
 
   updateUser(): void {
-    // Optionally, you might want to require the current password before updating.
     if (!this.currentPassword) {
       this.snackBar.open('Current password is required.', 'OK', { duration: 2000 });
       return;
     }
+  
+    // Build the payload. Include the new password only if provided.
     const updatedDetails: any = {
-      Username: this.userData.Username,
+      Username: this.userData.Username,  // New username (if changed)
       Email: this.userData.Email,
       Birthday: this.userData.Birthday,
-      // If a new password is provided, include it. Otherwise, you might skip it.
-      Password: this.userData.Password ? this.userData.Password : undefined,
+      Password: this.userData.Password ? this.userData.Password : undefined
     };
-    console.log('Updating user with:', updatedDetails);
-
-    const username = localStorage.getItem('user');
-    if (!username) {
+  
+    // Use the old username stored in localStorage for the URL,
+    // so the backend’s permission check passes.
+    const oldUsername = localStorage.getItem('user');
+    if (!oldUsername) {
       this.snackBar.open('User not found in localStorage.', 'OK', { duration: 2000 });
       return;
     }
-
-    this.fetchApiData.updateUserProfile(username, updatedDetails).subscribe(
+  
+    this.fetchApiData.updateUserProfile(oldUsername, updatedDetails).subscribe(
       (result: any) => {
-        console.log('User update success:', result);
+        console.log('User update successful:', result);
+        // Update localStorage with the new username from the result
         localStorage.setItem('user', result.user.Username);
         this.dialogRef.close();
-        this.snackBar.open('User updated successfully!', 'OK', { duration: 2000 });
+        this.snackBar.open('Profile updated successfully!', 'OK', { duration: 2000 });
+        // Reload the profile page (or navigate to it) to show updated info
         this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
           this.router.navigate(['/profile']);
         });
@@ -88,6 +92,7 @@ export class UpdateUserFormComponent implements OnInit {
       }
     );
   }
+  
 
   closeDialog(): void {
     this.dialogRef.close();
