@@ -1,54 +1,65 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FetchApiDataService } from '../fetch-api-data.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { PLATFORM_ID } from '@angular/core';
 
 @Component({
   selector: 'app-update-user-form',
   templateUrl: './update-user-form.component.html',
-  styleUrls: ['./update-user-form.component.scss'],
+  styleUrls: ['./update-user-form.component.scss']
 })
 export class UpdateUserFormComponent implements OnInit {
-  // Form model for the update form
+  // This object holds the updated user info.
   userData: any = {
     Username: '',
     Email: '',
     Birthday: '',
-    Password: '' // New password (if the user wishes to change it)
+    Password: ''  // This is used if the user wants to change their password.
   };
 
-  // Field for current password to verify the update
+  // Field for confirming changes (i.e. the user's current password)
   currentPassword: string = '';
+  isBrowser: boolean = false;
 
   constructor(
     public fetchApiData: FetchApiDataService,
     public dialogRef: MatDialogRef<UpdateUserFormComponent>,
     public snackBar: MatSnackBar,
-    private router: Router
-  ) {}
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    // Determine if we are running in the browser.
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
 
   ngOnInit(): void {
-    // Retrieve the username stored as a plain string in localStorage
-    const username = localStorage.getItem('user');
-    if (username) {
-      this.fetchApiData.getUser(username).subscribe(
-        (data: any) => {
-          // Prepopulate the form with existing user details.
-          this.userData.Username = data.Username;
-          this.userData.Email = data.Email;
-          // Format Birthday as YYYY-MM-DD if it exists.
-          this.userData.Birthday = data.Birthday ? data.Birthday.split('T')[0] : '';
-          this.userData.Password = ''; // Leave password blank
-        },
-        (error) => {
-          console.error('Error loading user data:', error);
-          this.snackBar.open('Error loading user data. Please try again.', 'OK', { duration: 2000 });
-        }
-      );
-    } else {
-      console.error('No user found in localStorage');
-      this.snackBar.open('User not found. Please log in again.', 'OK', { duration: 2000 });
+    // Only access localStorage if we are in the browser.
+    if (this.isBrowser) {
+      const username = localStorage.getItem('user');
+      if (username) {
+        // Fetch the full user data from the API.
+        this.fetchApiData.getUser(username).subscribe(
+          (data: any) => {
+            this.userData = {
+              Username: data.Username,
+              Email: data.Email,
+              // Format the Birthday (assumes ISO string) to YYYY-MM-DD.
+              Birthday: data.Birthday ? data.Birthday.split('T')[0] : '',
+              Password: '' // Leave blank for new password.
+            };
+          },
+          (error) => {
+            console.error('Error fetching user data:', error);
+            this.snackBar.open('Error loading user info. Please try again.', 'OK', { duration: 2000 });
+          }
+        );
+      } else {
+        console.error('No user found in localStorage');
+        this.snackBar.open('User not found. Please log in again.', 'OK', { duration: 2000 });
+      }
     }
   }
 
@@ -58,30 +69,33 @@ export class UpdateUserFormComponent implements OnInit {
       return;
     }
   
-    // Build the payload. Include the new password only if provided.
+    // Prepare the updated user data. Only include the new password if provided.
     const updatedDetails: any = {
-      Username: this.userData.Username,  // New username (if changed)
+      Username: this.userData.Username,
       Email: this.userData.Email,
       Birthday: this.userData.Birthday,
       Password: this.userData.Password ? this.userData.Password : undefined
     };
   
-    // Use the old username stored in localStorage for the URL,
-    // so the backend’s permission check passes.
-    const oldUsername = localStorage.getItem('user');
-    if (!oldUsername) {
+    // Retrieve the username from localStorage (only in the browser)
+    let username = '';
+    if (this.isBrowser) {
+      username = localStorage.getItem('user') || '';
+    }
+    if (!username) {
       this.snackBar.open('User not found in localStorage.', 'OK', { duration: 2000 });
       return;
     }
   
-    this.fetchApiData.updateUserProfile(oldUsername, updatedDetails).subscribe(
+    // Call the service to update the user profile.
+    this.fetchApiData.updateUserProfile(username, updatedDetails).subscribe(
       (result: any) => {
-        console.log('User update successful:', result);
-        // Update localStorage with the new username from the result
+        console.log('User update success:', result);
+        // Optionally update localStorage with the new username if it changed.
         localStorage.setItem('user', result.user.Username);
         this.dialogRef.close();
-        this.snackBar.open('Profile updated successfully!', 'OK', { duration: 2000 });
-        // Reload the profile page (or navigate to it) to show updated info
+        this.snackBar.open('User updated successfully!', 'OK', { duration: 2000 });
+        // Reload the profile page (this method forces a refresh).
         this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
           this.router.navigate(['/profile']);
         });
@@ -92,7 +106,6 @@ export class UpdateUserFormComponent implements OnInit {
       }
     );
   }
-  
 
   closeDialog(): void {
     this.dialogRef.close();
